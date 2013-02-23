@@ -1,0 +1,37 @@
+#!/bin/bash
+if which cutycapt >/dev/null; then
+    echo "- system looks fine, let's start -"
+else
+    echo "*******************************************"
+	echo "HOLY DOGSHIT YOU DON'T HAVE CUTYCAPT, DO YOU ?!"
+	echo '"sudo apt-get install cutycapt", slimy bastard !'
+    echo "   --- script ending in 10 seconds ---"
+    echo "*******************************************"
+	sleep 10
+	exit
+fi
+url="$1"
+if [ -z "$1" ]
+then read -p "please enter URL to screenshot: " url
+fi
+server=$(echo $url | awk -F "/" '{print $3}')
+server_out=$(echo $server | sed 's/\./_/g')
+filename=$(echo $url | sed s/$server// | sed 's/http:\/\///')
+filename_out=$(echo $url | sed s/$server// | sed 's/http:\/\///' | sed 's/https:\/\///' | sed 's/\//_/g' | sed 's/[^0-9a-z]//g')
+if [ -z "$filename_out" ]
+then filename_out=$(echo "index")
+fi
+mkdir -p "$server_out"
+echo "***"
+echo "filename: $filename_out foldername: $server_out"
+echo "***"
+cutycapt --url=$url --private-browsing=on --user-agent="Mozilla/5.0 (X11; U; Linux x86_64; C) CutyCapt" --header=DNT:1 --min-width=1280 --min-height=720 --out="$server_out/$filename_out.svg"
+echo "SVG: done."
+cutycapt --url=$url --private-browsing=on --user-agent="Mozilla/5.0 (X11; U; Linux x86_64; C) CutyCapt" --header=DNT:1 --min-width=1280 --min-height=720 --out="$server_out/$filename_out.png"
+echo "PNG: done."
+echo ""
+echo "---------------------------------------"
+echo "Done. You'll find your stuff in the folder $server_out :)"
+echo "5 seconds before exit. Have a nice day !"
+sleep 5
+exit

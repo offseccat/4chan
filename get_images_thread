@@ -1,0 +1,30 @@
+#!/bin/bash
+if which puf >/dev/null; then
+    echo "- system looks fine, let's start -"
+else
+    echo "*******************************************"
+	echo "HOLY DOGSHIT YOU DON'T HAVE PUF, DO YOU ?!"
+	echo '"sudo apt-get install puf", slimy bastard !'
+    echo "   --- script ending in 10 seconds ---"
+    echo "*******************************************"
+	sleep 10
+	exit
+fi
+echo ""
+read -p "Which 4chan thread ? Paste the URL ! " thread
+echo ""
+echo "# Let me download the thread and extract its image links."
+wget --quiet "$thread" -O - | grep -o '<a href="//images.4chan.org[^"]*' | sed 's/<a href="\/\//http:\/\//' >> imagelist
+echo ""
+echo "# Allright boy, let's download the images ! This will take some time."
+echo ""
+foldername=`echo $thread | awk -F '4chan.org' '{print $2}' | sed 's/\//_/g'`
+mkdir -p "img$foldername"
+puf -P "img$foldername" -i imagelist
+rm imagelist
+echo ""
+echo "---------------------------------------"
+echo "Done. You'll find your stuff in the folder img$foldername :)"
+echo "5 seconds before exit. Have a nice day !"
+sleep 5
+exit

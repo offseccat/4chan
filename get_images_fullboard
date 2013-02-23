@@ -1,0 +1,45 @@
+#!/bin/bash
+if which puf >/dev/null; then
+    echo "- system looks fine, let's start -"
+else
+    echo "*******************************************"
+	echo "HOLY DOGSHIT YOU DON'T HAVE PUF, DO YOU ?!"
+	echo '"sudo apt-get install puf", slimy bastard !'
+    echo "   --- script ending in 10 seconds ---"
+    echo "*******************************************"
+	sleep 10
+	exit
+fi
+echo ""
+read -p "Which 4chan board ? Type the letter ! " boardletter
+board="http://boards.4chan.org/$boardletter"
+echo ""
+echo "# ok, let me retrieve the board pages. Need a few seconds."
+wget --quiet "$board/" -O - | grep -o 'res/[^"]*#' | sed 's/res\///' | sed 's/#//' >> threads
+	i=1
+	while [ $i -lt 17 ]; do wget --quiet "$board/$i" -O - | grep -o 'res/[^"]*#' | sed 's/res\///' | sed 's/#//' >> threads; let i=1+$i; done
+echo ""
+echo "# Done ! Now I gonna extract the thread links. Won't be long."
+mkdir -p "out"
+while read line; do echo "" > "out/$line"; done<threads
+cd out
+for file in *; do echo "$board/res/$file" >> ../threadlist; done
+cd ..
+rm -rf "out"
+rm threads
+echo ""
+echo "# That was quick. Now, let me download every thread and extract its image links. May take a minute or two."
+while read line; do wget --quiet "$line" -O - | grep -o '<a href="//images.4chan.org[^"]*' | sed 's/<a href="\/\//http:\/\//' >> imagelist; done<threadlist
+rm threadlist
+echo ""
+echo "# Allright boy, let's download the images ! This will take long, even longer with slow connection. Go take a dump, or walk the dinosaur. Meanwhile, I let you see how's puf going."
+echo ""
+mkdir -p "img_$boardletter"
+puf -P "img_$boardletter" -i imagelist
+rm imagelist
+echo ""
+echo "---------------------------------------"
+echo "Done. You'll find your stuff in the folder img_$boardletter :)"
+echo "5 seconds before exit. Have a nice day !"
+sleep 5
+exit
