@@ -18,7 +18,7 @@ wget --quiet "$thread" -O - | grep -o '<a href="//images.4chan.org[^"]*' | sed '
 echo ""
 echo "# Allright boy, let's download the images ! This will take some time."
 echo ""
-foldername=`echo $thread | awk -F '4chan.org' '{print $2}' | sed 's/\//_/g'`
+foldername=$(echo $thread | awk -F '4chan.org' '{print $2}' | sed 's/\//_/g')
 mkdir -p "img$foldername"
 puf -P "img$foldername" -i imagelist
 rm imagelist
